@@ -5,3 +5,7 @@ spring:
   output:
     ansi:
       enabled: always
+
+logging:
+  level:
+    com.example.logging: TRACE

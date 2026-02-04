@@ -8,10 +8,12 @@ import com.example.logging.exception.LackOfShortenUrlKeyException;
 import com.example.logging.exception.NotFoundShortenUrlException;
 import com.example.logging.repository.ShortenUrlRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShortenUrlService {
@@ -31,6 +33,7 @@ public class ShortenUrlService {
 
         ShortenUrl shortenUrl = new ShortenUrl(originalUrl, shortenUrlKey);
         repository.save(shortenUrl);
+        log.info("shortenUrl 생성: {}", shortenUrl);
 
         return ShortenUrlCreateResponseDto.from(shortenUrl);
     }
@@ -39,7 +42,7 @@ public class ShortenUrlService {
         ShortenUrl shortenUrl = repository.findShortenUrlByShortenUrlKey(shortenUrlKey);
 
         if(shortenUrl == null) {
-            throw new NotFoundShortenUrlException();
+            throw new NotFoundShortenUrlException("단축 URL을 찾지 못했습니다. shortenUrlKey=" + shortenUrlKey);
         }
 
         return ShortenUrlInformationDto.from(shortenUrl);
@@ -49,7 +52,7 @@ public class ShortenUrlService {
         ShortenUrl shortenUrl = repository.findShortenUrlByShortenUrlKey(shortenUrlKey);
 
         if(shortenUrl == null) {
-            throw new NotFoundShortenUrlException();
+            throw new NotFoundShortenUrlException("단축 URL을 찾지 못했습니다. shortenUrlKey=" + shortenUrlKey);
         }
 
         shortenUrl.increaseRedirectCount();
@@ -69,6 +72,8 @@ public class ShortenUrlService {
             if(shortenUrl == null) {
                 return shortenUrlKey;
             }
+
+            log.warn("단축 URL 생성 재시도 횟수 : {}", count + 1);
         }
 
         throw new LackOfShortenUrlKeyException();
